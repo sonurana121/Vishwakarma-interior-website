@@ -1,0 +1,352 @@
+{
+  "entities": {
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized business owner record mapped by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 160
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "ProjectLocation": {
+      "title": "ProjectLocation",
+      "description": "Completed project neighborhood or city pin displayed on Google Maps.",
+      "type": "object",
+      "properties": {
+        "area_name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "city": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["area_name", "city", "lat", "lng", "description", "created_at"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Completed interior design, carpentry, or furniture project with before/after photography.",
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 180
+        },
+        "work_type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "location_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "location_name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 140
+        },
+        "city": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "completion_date": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "area_sqft": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "duration_weeks": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "client_name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 1200
+        },
+        "scope_details": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "before_image": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 500
+        },
+        "after_image": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 500
+        },
+        "gallery_images": {
+          "type": "array"
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "slug",
+        "title",
+        "work_type",
+        "location_name",
+        "city",
+        "lat",
+        "lng",
+        "completion_date",
+        "summary",
+        "before_image",
+        "after_image",
+        "gallery_images",
+        "featured",
+        "created_at"
+      ]
+    },
+    "ServiceItem": {
+      "title": "ServiceItem",
+      "description": "Interior design, modular, furniture, or carpentry service offering.",
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "category": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "short_description": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 500
+        },
+        "materials_spec": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "timeline_estimate": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "image_url": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 500
+        },
+        "display_order": {
+          "type": "integer"
+        },
+        "active": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "slug",
+        "title",
+        "category",
+        "short_description",
+        "image_url",
+        "display_order",
+        "active"
+      ]
+    },
+    "CustomerInquiry": {
+      "title": "CustomerInquiry",
+      "description": "Customer consultation and site-visit inquiry containing PII.",
+      "type": "object",
+      "properties": {
+        "customer_name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "mobile_number": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 24
+        },
+        "location": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "service_required": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "project_details": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "project_ref_slug": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "status": {
+          "type": "string",
+          "enum": ["New", "Contacted", "Site Visit Scheduled", "Completed"]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "customer_name",
+        "mobile_number",
+        "location",
+        "service_required",
+        "status",
+        "created_at"
+      ]
+    },
+    "BusinessSettings": {
+      "title": "BusinessSettings",
+      "description": "Public contact and workshop settings for Vishwakarma Interior Services Centre.",
+      "type": "object",
+      "properties": {
+        "business_phone": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 32
+        },
+        "whatsapp_number": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 20
+        },
+        "business_email": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 180
+        },
+        "workshop_address": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 240
+        },
+        "working_hours": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "business_phone",
+        "whatsapp_number",
+        "business_email",
+        "workshop_address",
+        "working_hours"
+      ]
+    }
+  },
+  "firestore": {
+    "/admins/{uid}": {
+      "schema": {
+        "$ref": "#/entities/AdminUser"
+      },
+      "description": "Allowlisted owner/admin accounts keyed by Firebase UID."
+    },
+    "/locations/{locationId}": {
+      "schema": {
+        "$ref": "#/entities/ProjectLocation"
+      },
+      "description": "Publicly browsable project neighborhood coordinates across Cuttack and Odisha."
+    },
+    "/projects/{projectId}": {
+      "schema": {
+        "$ref": "#/entities/Project"
+      },
+      "description": "Publicly browsable completed interior and carpentry projects."
+    },
+    "/services/{serviceId}": {
+      "schema": {
+        "$ref": "#/entities/ServiceItem"
+      },
+      "description": "Catalog of interior design, furniture, and carpentry services."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": {
+        "$ref": "#/entities/CustomerInquiry"
+      },
+      "description": "Customer inquiry leads containing PII; write-only create for visitors, read/manage strictly for verified admin."
+    },
+    "/settings/{settingId}": {
+      "schema": {
+        "$ref": "#/entities/BusinessSettings"
+      },
+      "description": "Singleton business contact and workshop configuration document."
+    }
+  }
+}

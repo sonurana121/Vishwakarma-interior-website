@@ -1,0 +1,222 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedAdminEmail() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'sonurana9lenovo@gmail.com';
+    }
+
+    function isAdmin() {
+      return isVerifiedAdminEmail()
+        || (
+          isSignedIn()
+          && request.auth.token.email_verified == true
+          && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
+    }
+
+    function isValidLocation(data) {
+      return data.keys().hasAll(['area_name', 'city', 'lat', 'lng', 'description', 'created_at'])
+        && data.keys().hasOnly(['area_name', 'city', 'lat', 'lng', 'description', 'created_at'])
+        && data.area_name is string && data.area_name.size() >= 2 && data.area_name.size() <= 120
+        && data.city is string && data.city.size() >= 2 && data.city.size() <= 80
+        && (data.lat is int || data.lat is float) && data.lat >= -90 && data.lat <= 90
+        && (data.lng is int || data.lng is float) && data.lng >= -180 && data.lng <= 180
+        && data.description is string && data.description.size() <= 400
+        && data.created_at is timestamp;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll([
+          'slug', 'title', 'work_type', 'location_name', 'city', 'lat', 'lng',
+          'completion_date', 'summary', 'before_image', 'after_image',
+          'gallery_images', 'featured', 'created_at'
+        ])
+        && data.keys().hasOnly([
+          'slug', 'title', 'work_type', 'location_id', 'location_name', 'city', 'lat', 'lng',
+          'completion_date', 'area_sqft', 'duration_weeks', 'client_name', 'summary',
+          'scope_details', 'before_image', 'after_image', 'gallery_images', 'featured', 'created_at'
+        ])
+        && isValidId(data.slug)
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 180
+        && data.work_type is string && data.work_type.size() >= 2 && data.work_type.size() <= 100
+        && (!data.keys().hasAny(['location_id']) || data.location_id == null || (data.location_id is string && data.location_id.size() <= 128))
+        && data.location_name is string && data.location_name.size() >= 2 && data.location_name.size() <= 140
+        && data.city is string && data.city.size() >= 2 && data.city.size() <= 80
+        && (data.lat is int || data.lat is float) && data.lat >= -90 && data.lat <= 90
+        && (data.lng is int || data.lng is float) && data.lng >= -180 && data.lng <= 180
+        && data.completion_date is string && data.completion_date.size() >= 2 && data.completion_date.size() <= 60
+        && (!data.keys().hasAny(['area_sqft']) || (data.area_sqft is string && data.area_sqft.size() <= 60))
+        && (!data.keys().hasAny(['duration_weeks']) || (data.duration_weeks is string && data.duration_weeks.size() <= 60))
+        && (!data.keys().hasAny(['client_name']) || (data.client_name is string && data.client_name.size() <= 120))
+        && data.summary is string && data.summary.size() >= 5 && data.summary.size() <= 1200
+        && (!data.keys().hasAny(['scope_details']) || (data.scope_details is string && data.scope_details.size() <= 2000))
+        && data.before_image is string && data.before_image.size() >= 5 && data.before_image.size() <= 500
+        && data.after_image is string && data.after_image.size() >= 5 && data.after_image.size() <= 500
+        && data.gallery_images is list && data.gallery_images.size() >= 1 && data.gallery_images.size() <= 20
+        && data.gallery_images[0] is string && data.gallery_images[0].size() <= 500
+        && data.featured is bool
+        && data.created_at is timestamp;
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll([
+          'slug', 'title', 'category', 'short_description', 'image_url', 'display_order', 'active'
+        ])
+        && data.keys().hasOnly([
+          'slug', 'title', 'category', 'short_description', 'materials_spec',
+          'timeline_estimate', 'image_url', 'display_order', 'active'
+        ])
+        && isValidId(data.slug)
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 120
+        && data.category is string && data.category.size() >= 2 && data.category.size() <= 80
+        && data.short_description is string && data.short_description.size() >= 5 && data.short_description.size() <= 500
+        && (!data.keys().hasAny(['materials_spec']) || (data.materials_spec is string && data.materials_spec.size() <= 240))
+        && (!data.keys().hasAny(['timeline_estimate']) || (data.timeline_estimate is string && data.timeline_estimate.size() <= 80))
+        && data.image_url is string && data.image_url.size() >= 5 && data.image_url.size() <= 500
+        && data.display_order is int && data.display_order >= 0 && data.display_order <= 10000
+        && data.active is bool;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll([
+          'customer_name', 'mobile_number', 'location', 'service_required', 'status', 'created_at'
+        ])
+        && data.keys().hasOnly([
+          'customer_name', 'mobile_number', 'location', 'service_required',
+          'project_details', 'project_ref_slug', 'status', 'created_at'
+        ])
+        && data.customer_name is string && data.customer_name.size() >= 2 && data.customer_name.size() <= 120
+        && data.mobile_number is string && data.mobile_number.size() >= 10 && data.mobile_number.size() <= 24
+        && data.location is string && data.location.size() >= 2 && data.location.size() <= 160
+        && data.service_required is string && data.service_required.size() >= 2 && data.service_required.size() <= 120
+        && (!data.keys().hasAny(['project_details']) || (data.project_details is string && data.project_details.size() <= 2000))
+        && (!data.keys().hasAny(['project_ref_slug']) || data.project_ref_slug == null || (data.project_ref_slug is string && data.project_ref_slug.size() <= 120))
+        && data.status is string
+        && data.status in ['New', 'Contacted', 'Site Visit Scheduled', 'Completed']
+        && data.created_at is timestamp;
+    }
+
+    function isValidSettings(data) {
+      return data.keys().hasAll([
+          'business_phone', 'whatsapp_number', 'business_email', 'workshop_address', 'working_hours'
+        ])
+        && data.keys().hasOnly([
+          'business_phone', 'whatsapp_number', 'business_email', 'workshop_address', 'working_hours'
+        ])
+        && data.business_phone is string && data.business_phone.size() >= 6 && data.business_phone.size() <= 32
+        && data.whatsapp_number is string && data.whatsapp_number.size() >= 10 && data.whatsapp_number.size() <= 20
+        && data.business_email is string && data.business_email.size() >= 5 && data.business_email.size() <= 180
+        && data.workshop_address is string && data.workshop_address.size() >= 5 && data.workshop_address.size() <= 240
+        && data.working_hours is string && data.working_hours.size() >= 4 && data.working_hours.size() <= 120;
+    }
+
+    match /test/connection {
+      allow get: if true;
+      allow list, write: if false;
+    }
+
+    match /admins/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list: if isVerifiedAdminEmail();
+      allow create, update, delete: if false;
+    }
+
+    match /locations/{locationId} {
+      allow get: if isValidId(locationId);
+      allow list: if true;
+      allow create: if isAdmin()
+        && isValidId(locationId)
+        && isValidLocation(incoming())
+        && incoming().created_at == request.time;
+      allow update: if isAdmin()
+        && isValidId(locationId)
+        && isValidLocation(incoming())
+        && incoming().created_at == existing().created_at
+        && incoming().diff(existing()).affectedKeys().hasOnly(['area_name', 'city', 'lat', 'lng', 'description']);
+      allow delete: if isAdmin() && isValidId(locationId);
+    }
+
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId);
+      allow list: if true;
+      allow create: if isAdmin()
+        && isValidId(projectId)
+        && isValidProject(incoming())
+        && incoming().created_at == request.time;
+      allow update: if isAdmin()
+        && isValidId(projectId)
+        && isValidProject(incoming())
+        && incoming().created_at == existing().created_at
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'slug', 'title', 'work_type', 'location_id', 'location_name', 'city', 'lat', 'lng',
+          'completion_date', 'area_sqft', 'duration_weeks', 'client_name', 'summary',
+          'scope_details', 'before_image', 'after_image', 'gallery_images', 'featured'
+        ]);
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+
+    match /services/{serviceId} {
+      allow get: if isValidId(serviceId) && (existing().active == true || isAdmin());
+      allow list: if resource.data.active == true || isVerifiedAdminEmail();
+      allow create: if isAdmin()
+        && isValidId(serviceId)
+        && isValidService(incoming());
+      allow update: if isAdmin()
+        && isValidId(serviceId)
+        && isValidService(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'slug', 'title', 'category', 'short_description', 'materials_spec',
+          'timeline_estimate', 'image_url', 'display_order', 'active'
+        ]);
+      allow delete: if isAdmin() && isValidId(serviceId);
+    }
+
+    match /inquiries/{inquiryId} {
+      allow get: if isValidId(inquiryId) && isAdmin();
+      allow list: if isVerifiedAdminEmail();
+      allow create: if isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().status == 'New'
+        && incoming().created_at == request.time;
+      allow update: if isAdmin()
+        && isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().created_at == existing().created_at
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin() && isValidId(inquiryId);
+    }
+
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'business';
+      allow list: if false;
+      allow create, update: if isAdmin()
+        && isValidId(settingId)
+        && settingId == 'business'
+        && isValidSettings(incoming());
+      allow delete: if false;
+    }
+  }
+}

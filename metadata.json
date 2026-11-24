@@ -1,0 +1,6 @@
+{
+  "name": "Vishwakarma Interior Services Centre",
+  "description": "Bespoke interior design, modular kitchens, custom furniture, and carpentry services in Cuttack, Odisha led by Bipin Kumar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
